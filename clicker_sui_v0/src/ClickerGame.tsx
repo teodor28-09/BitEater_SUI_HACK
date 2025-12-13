@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Flex, Text, Heading, Box } from "@radix-ui/themes";
 import ClipLoader from "react-spinners/ClipLoader";
+import { fromHex } from '@mysten/sui/utils';
 import { Transaction } from "@mysten/sui/transactions";
 import { useNetworkVariable } from "./networkConfig";
 import {
@@ -20,19 +21,18 @@ interface ClickerGameProps {
 
 export function ClickerGame({ availableTime, onTimeUsed, onTimeUpdate }: ClickerGameProps) {
   const counterPackageId = useNetworkVariable("counterPackageId");
-  const suiClient = useSuiClient();
+  const gameBankId = "0x811fcedcb7a67bfc32de73f0f5bd1eb7abb2d3f87b9368e447ff930e8c313b04";
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+  const suiClient = useSuiClient();
 
   // GAME STATE
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [initialTime, setInitialTime] = useState(0);
-
   // TX / UI STATE
   const [waiting, setWaiting] = useState(false);
-  const [counterId, setCounterId] = useState<string | null>(null);
   const [status, setStatus] = useState("");
 
   const coinRef = useRef<HTMLButtonElement | null>(null);
@@ -123,76 +123,156 @@ export function ClickerGame({ availableTime, onTimeUsed, onTimeUpdate }: Clicker
     setStatus("Game stopped");
   }
 
-  function createCounter(): Promise<string | null> {
-    setWaiting(true);
-    setStatus("Creating on-chain object…");
+  // function createCounter(): Promise<string | null> {
+  //   setWaiting(true);
+  //   setStatus("Creating on-chain object…");
 
-    const tx = new Transaction();
-    tx.moveCall({
-      target: `${counterPackageId}::counter::create`,
-      arguments: [],
-    });
+  //   const tx = new Transaction();
+  //   tx.moveCall({
+  //     target: `${counterPackageId}::counter::create`,
+  //     arguments: [],
+  //   });
 
-    return new Promise((resolve) => {
-      signAndExecute(
-        { transaction: tx },
-        {
-          onSuccess: async ({ digest }) => {
-            const { effects } = await suiClient.waitForTransaction({
-              digest,
-              options: { showEffects: true },
-            });
+  //   return new Promise((resolve) => {
+  //     signAndExecute(
+  //       { transaction: tx },
+  //       {
+  //         onSuccess: async ({ digest }) => {
+  //           const { effects } = await suiClient.waitForTransaction({
+  //             digest,
+  //             options: { showEffects: true },
+  //           });
 
-            const id = effects?.created?.[0]?.reference?.objectId ?? null;
-            setCounterId(id);
-            setWaiting(false);
-            setStatus(id ? "Counter created. Press Submit again." : "");
-            resolve(id);
-          },
-          onError: () => {
-            setWaiting(false);
-            setStatus("");
-            resolve(null);
-          },
-        },
-      );
-    });
-  }
+  //           const id = effects?.created?.[0]?.reference?.objectId ?? null;
+  //           setCounterId(id);
+  //           setWaiting(false);
+  //           setStatus(id ? "Counter created. Press Submit again." : "");
+  //           resolve(id);
+  //         },
+  //         onError: () => {
+  //           setWaiting(false);
+  //           setStatus("");
+  //           resolve(null);
+  //         },
+  //       },
+  //     );
+  //   });
+  // }
 
-  async function submitScoreOnChain() {
+  // async function submitScoreOnChain() {
+  //   if (!currentAccount || !rewardEligible) return;
+
+  //   setIsRunning(false);
+
+  //   if (!counterId) {
+  //     await createCounter();
+  //     return;
+  //   }
+
+  //   setWaiting(true);
+  //   setStatus("Submitting score on-chain…");
+
+  //   const tx = new Transaction();
+  //   tx.moveCall({
+  //     target: `${counterPackageId}::counter::set_value`,
+  //     arguments: [tx.object(counterId), tx.pure.u64(score)],
+  //   });
+
+  //   signAndExecute(
+  //     { transaction: tx },
+  //     {
+  //       onSuccess: async ({ digest }) => {
+  //         await suiClient.waitForTransaction({ digest });
+  //         setWaiting(false);
+  //         setStatus("Score submitted ✅");
+  //       },
+  //       onError: () => {
+  //         setWaiting(false);
+  //         setStatus("");
+  //       },
+  //     },
+  //   );
+  // }
+
+  async function claimRewardOnChain() {
     if (!currentAccount || !rewardEligible) return;
 
-    setIsRunning(false);
-
-    if (!counterId) {
-      await createCounter();
+    if (!counterPackageId) {
+      setStatus("Missing package ID: cannot build transaction");
+      setWaiting(false);
       return;
     }
 
     setWaiting(true);
-    setStatus("Submitting score on-chain…");
+    setStatus("Claiming reward on-chain…");
 
-    const tx = new Transaction();
-    tx.moveCall({
-      target: `${counterPackageId}::counter::set_value`,
-      arguments: [tx.object(counterId), tx.pure.u64(score)],
-    });
+    // 1. Prepare the data (The "Struct")
+    const payload = {
+        userAddress: currentAccount.address, // This comes from the connected wallet
+        points: score
+    };
 
-    signAndExecute(
-      { transaction: tx },
-      {
+    try {
+      const response = await fetch('http://localhost:5000/claim', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error('Claim server returned non-OK:', response.status, text);
+        setStatus('Claim server error: ' + response.status);
+        setWaiting(false);
+        return;
+      }
+
+      const data = await response.json();
+      console.log("Server Response:", data);
+      
+      if (data.status !== "success" || !data.signature) {
+        console.log("Server Error:", data);
+        setWaiting(false);
+        setStatus("Failed to claim reward: invalid server response.");
+        return; 
+      }
+
+      const signatureBytes = fromHex(data.signature);
+      const amountInMints = score * 20_000_00;
+      
+      const tx = new Transaction();
+      tx.moveCall({
+        target: `${counterPackageId}::clicker::claim_reward`,
+        arguments: [
+          tx.object(gameBankId),
+          tx.pure.u64(amountInMints),
+          tx.pure.vector('u8', signatureBytes)
+        ],
+      });
+
+      // Submitting transaction
+
+      signAndExecute({ transaction: tx }, {
         onSuccess: async ({ digest }) => {
           await suiClient.waitForTransaction({ digest });
+          setStatus("Success! Rewards claimed.");
           setWaiting(false);
-          setStatus("Score submitted ✅");
+          console.log('tx success, digest:', digest);
         },
-        onError: () => {
+        onError: (err) => {
+          console.log(err);
+          setStatus("Transaction Failed on-chain: " + (err?.message ?? 'unknown'));
           setWaiting(false);
-          setStatus("");
-        },
-      },
-    );
-  }
+        }
+      });
+    } catch (err) {
+      console.error('Claim flow error:', err);
+      setStatus('Claim flow failed: ' + (err instanceof Error ? err.message : String(err)));
+      setWaiting(false);
+    }
+}
 
   const startDisabled = waiting || !currentAccount || availableTime <= 0;
   const submitDisabled = waiting || !currentAccount || !rewardEligible;
@@ -217,7 +297,7 @@ export function ClickerGame({ availableTime, onTimeUsed, onTimeUpdate }: Clicker
           <Text className={`pill ${isRunning ? "animate-live-pulse" : ""}`}>⏱ {timeLeft}s</Text>
           <Text className={`pill ${score > 0 ? "animate-live-pulse" : ""}`}>⭐ {score}</Text>
 
-          <Button size="2" onClick={submitScoreOnChain} disabled={submitDisabled}>
+          <Button size="2" onClick={claimRewardOnChain} disabled={submitDisabled}>
             {waiting ? <ClipLoader size={16} /> : "Submit"}
           </Button>
 
@@ -239,8 +319,7 @@ export function ClickerGame({ availableTime, onTimeUsed, onTimeUpdate }: Clicker
       <Flex className="center" direction="column" align="center" justify="center" gap="3">
         <button
           ref={coinRef}
-          className={`coin coin-icon $
-            {canClick ? "" : "coin-disabled"}`}
+          className={`coin coin-icon ${canClick ? "" : "coin-disabled"}`}
           onClick={click}
           disabled={!canClick}
           aria-label="Coin clicker"
