@@ -244,13 +244,6 @@ https://chatgpt.com/share/693c3775-af2c-8006-baa2-5786f3eb1a8b
 
 
 
-# To start python server
-```bash
-  cd ./clicker_sui_v0/off_chain/server/server
-  source ./venv/bin/activate
-  pip install fastapi pynacl uvicorn dotenv
-  uvicorn server:app --reload --port 5000
-```
 
 
 ## Starting your dApp
@@ -258,6 +251,7 @@ https://chatgpt.com/share/693c3775-af2c-8006-baa2-5786f3eb1a8b
 To install dependencies you can run
 
 ```bash
+cd clicker_sui_v0
 pnpm install
 ```
 
@@ -273,4 +267,12 @@ To build your app for deployment you can run
 
 ```bash
 pnpm build
+```
+
+# To start python server
+```bash
+  cd ./clicker_sui_v0/off_chain/server/server
+  source ./venv/bin/activate
+  pip install fastapi pynacl uvicorn dotenv
+  uvicorn server:app --reload --port 5000
 ```

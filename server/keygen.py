@@ -8,6 +8,5 @@ public_key = private_key.verify_key
 priv_hex = private_key.encode().hex()
 pub_hex = public_key.encode().hex()
 
-print("--- COPY THESE ---")
-print(f"PRIVATE KEY (For your .env file): {priv_hex}")
-print(f"PUBLIC KEY  (For your Move file): {pub_hex}")
+print(f"PRIVATE KEY (.env file): {priv_hex}")
+print(f"PUBLIC KEY  (Move file): {pub_hex}")
