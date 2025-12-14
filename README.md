@@ -1,4 +1,5 @@
 # Proof of CLICK 
+![Project Screenshot](./images/proof1.jpeg)
 Kahoot Style:
     10 minutes total time allocated per day
     1 question - 1 minute
@@ -15,6 +16,8 @@ Achievements:<br>
         2 quiz indeplinite - badge "Incepator"<br>
         5 quiz indeplinite - badge "Avansat"
 
+
+![Project Screenshot](./images/proof2.jpeg)
 
 A small Sui-based clicker + quiz dApp that demonstrates on-chain reward claims, an off-chain signer service, and a React frontend.
 
@@ -68,6 +71,8 @@ The Move contract lives in `on_chain/smart_contract/sources/clicker.move` and co
 Important: the admin public key in the Move source (`ADMIN_PUBLIC_KEY`) must match the public key produced by `keygen.py`.
 
 Build artifacts are available in `on_chain/smart_contract/build/` after compilation.
+
+![Project Screenshot](./images/proof3.jpeg)
 
 ## Notes about development
 
