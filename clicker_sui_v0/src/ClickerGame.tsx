@@ -34,8 +34,11 @@ export function ClickerGame({ availableTime, onTimeUsed, onTimeUpdate }: Clicker
   // TX / UI STATE
   const [waiting, setWaiting] = useState(false);
   const [status, setStatus] = useState("");
+  // PARTICLE STATE
+  const [particles, setParticles] = useState<Array<{ id: number; angle: number; distance: number; x: number; y: number; speed: number; peakY: number }>>([]);
 
   const coinRef = useRef<HTMLButtonElement | null>(null);
+  const particleIdRef = useRef(0);
 
   // TIMER
   useEffect(() => {
@@ -96,10 +99,46 @@ export function ClickerGame({ availableTime, onTimeUsed, onTimeUpdate }: Clicker
     el.classList.add("coin-press");
   }
 
+  function createParticles() {
+    const newParticles: Array<{ id: number; angle: number; distance: number; x: number; y: number; speed: number; peakY: number }> = [];
+    const particleCount = 6; // Fewer particles for subtle effect
+    const screenHeight = window.innerHeight;
+    const screenWidth = window.innerWidth;
+    
+    for (let i = 0; i < particleCount; i++) {
+      // Subtle fountain: particles shoot upward at various angles
+      const angle = (Math.PI * 2 * i) / particleCount + (Math.random() - 0.5) * 0.2; // Less spread
+      
+      // Calculate subtle fountain arc: shorter distance
+      const peakHeight = screenHeight * 0.15 + Math.random() * screenHeight * 0.1; // Lower peak
+      const horizontalDistance = Math.cos(angle) * (screenWidth * 0.2 + Math.random() * screenWidth * 0.1);
+      const finalY = screenHeight * 0.2 + Math.random() * screenHeight * 0.15; // Closer landing
+      
+      const speed = 0.8 + Math.random() * 0.3; // Faster, less variation
+      
+      newParticles.push({
+        id: particleIdRef.current++,
+        angle,
+        distance: Math.sqrt(horizontalDistance * horizontalDistance + finalY * finalY),
+        x: horizontalDistance,
+        y: finalY,
+        speed,
+        peakY: -peakHeight, // Negative because it goes up first
+      });
+    }
+    setParticles((prev) => [...prev, ...newParticles]);
+    
+    // Remove particles after animation (shorter duration)
+    setTimeout(() => {
+      setParticles((prev) => prev.filter((p) => !newParticles.some((np) => np.id === p.id)));
+    }, 1500);
+  }
+
   function click() {
     if (!canClick) return;
     setScore((s) => s + 1);
     animateCoin();
+    createParticles();
   }
 
   function start() {
@@ -317,17 +356,33 @@ export function ClickerGame({ availableTime, onTimeUsed, onTimeUpdate }: Clicker
 
       {/* CENTER COIN */}
       <Flex className="center" direction="column" align="center" justify="center" gap="3">
-        <button
-          ref={coinRef}
-          className={`coin coin-icon ${canClick ? "" : "coin-disabled"}`}
-          onClick={click}
-          disabled={!canClick}
-          aria-label="Coin clicker"
-        >
-          <span className="coin-svg" style={{ fontSize: "4rem" }}>🪙</span>
-        </button>
+        <div className="coin-container">
+          <button
+            ref={coinRef}
+            className={`coin coin-icon ${canClick ? "" : "coin-disabled"}`}
+            onClick={click}
+            disabled={!canClick}
+            aria-label="Coin clicker"
+          >
+            <span className="coin-svg" style={{ fontSize: "210px", lineHeight: "1", display: "flex", alignItems: "center", justifyContent: "center" }}>🪙</span>
+          </button>
+          {particles.map((particle) => (
+            <span
+              key={particle.id}
+              className="coin-particle"
+              style={{
+                '--end-x': `${particle.x}px`,
+                '--end-y': `${particle.y}px`,
+                '--peak-y': `${particle.peakY}px`,
+                '--speed': particle.speed,
+              } as React.CSSProperties}
+            >
+              🪙
+            </span>
+          ))}
+        </div>
 
-        <Text size="2" color="gray">
+        <Text size="2" color="gray" className="coin-message">
           {isRunning
             ? "Click the coin!"
             : !currentAccount

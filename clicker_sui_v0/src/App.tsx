@@ -6,6 +6,7 @@ import { ScoreScreen } from "./ScoreScreen";
 import { ClickerGame } from "./ClickerGame";
 import { WalletGate } from "./WalletGate";
 import { quizQuestions } from "./quizData";
+import "./clicker.css";
 
 interface SavedScore {
   totalScore: number; // Accumulated total score in seconds
@@ -147,6 +148,17 @@ function App() {
 
   return (
     <WalletGate>
+      {/* Animated background effects */}
+      <div className="background-effects">
+        <div className="bg-gradient-1"></div>
+        <div className="bg-gradient-2"></div>
+        <div className="bg-gradient-3"></div>
+        <div className="bg-particles">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div key={i} className="bg-particle" style={{ '--delay': `${i * 0.2}s` } as React.CSSProperties}></div>
+          ))}
+        </div>
+      </div>
       <Flex
         position="sticky"
         px="4"

@@ -30,7 +30,7 @@ export function Quiz({ questions, onComplete }: QuizProps) {
   const [totalPoints, setTotalPoints] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const [timeRemaining, setTimeRemaining] = useState(60); // 1 minute in seconds
+  const [timeRemaining, setTimeRemaining] = useState(20); // 1 minute in seconds
   const [timeRemainingForQuestion, setTimeRemainingForQuestion] = useState<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -41,7 +41,7 @@ export function Quiz({ questions, onComplete }: QuizProps) {
   useEffect(() => {
     if (showResult) return; // Don't countdown when showing result
 
-    setTimeRemaining(60); // Reset timer for new question
+    setTimeRemaining(20); // Reset timer for new question
     setTimeRemainingForQuestion(null);
 
     timerRef.current = setInterval(() => {
@@ -80,7 +80,7 @@ export function Quiz({ questions, onComplete }: QuizProps) {
         }
         return prevScore;
       });
-      setTotalPoints((prevTotal) => prevTotal + 60); // Add full time to total possible
+      setTotalPoints((prevTotal) => prevTotal + 20); // Add full time to total possible
       
       setShowResult(true);
     }
@@ -116,7 +116,7 @@ export function Quiz({ questions, onComplete }: QuizProps) {
       setScore(score + remainingTime);
     }
     // Total possible points is the full 60 seconds per question
-    setTotalPoints(totalPoints + 60);
+    setTotalPoints(totalPoints + 20);
 
     setShowResult(true);
   };
@@ -164,7 +164,7 @@ export function Quiz({ questions, onComplete }: QuizProps) {
           <Text 
             size="4" 
             weight="bold" 
-            color={timeRemaining <= 10 ? "red" : timeRemaining <= 20 ? "yellow" : "green"}
+            color={timeRemaining <= 5 ? "red" : timeRemaining <= 10 ? "yellow" : "green"}
             style={{ 
               fontFamily: "monospace",
               fontSize: "1.5rem"
@@ -175,9 +175,9 @@ export function Quiz({ questions, onComplete }: QuizProps) {
         </Flex>
         <Progress value={progress} size="2" />
         <Progress 
-          value={(timeRemaining / 60) * 100} 
+          value={(timeRemaining / 20) * 100} 
           size="1" 
-          color={timeRemaining <= 10 ? "red" : timeRemaining <= 20 ? "yellow" : "green"}
+          color={timeRemaining <= 5 ? "red" : timeRemaining <= 10 ? "yellow" : "green"}
           mt="2"
         />
       </Box>

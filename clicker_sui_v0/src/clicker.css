@@ -1,13 +1,151 @@
 .page {
   min-height: 520px;
   padding: 16px;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
 }
+
+/* Animated background effects */
+.background-effects {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bg-gradient-1,
+.bg-gradient-2,
+.bg-gradient-3 {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+  animation: float 20s ease-in-out infinite;
+}
+
+.bg-gradient-1 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(147, 51, 234, 0.4), transparent);
+  top: -200px;
+  left: -200px;
+  animation-delay: 0s;
+}
+
+.bg-gradient-2 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.4), transparent);
+  bottom: -300px;
+  right: -300px;
+  animation-delay: -7s;
+}
+
+.bg-gradient-3 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.3), transparent);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation-delay: -14s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -30px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+.bg-particles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.bg-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  animation: particleFloat 15s ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+
+.bg-particle:nth-child(odd) {
+  background: rgba(147, 51, 234, 0.4);
+}
+
+.bg-particle:nth-child(3n) {
+  background: rgba(59, 130, 246, 0.4);
+  width: 6px;
+  height: 6px;
+}
+
+.bg-particle:nth-child(4n) {
+  background: rgba(236, 72, 153, 0.4);
+  width: 3px;
+  height: 3px;
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--move-x, 50px), var(--move-y, -50px)) scale(0);
+    opacity: 0;
+  }
+}
+
+/* Set positions and movement for particles */
+.bg-particle:nth-child(1) { left: 10%; top: 20%; --move-x: 80px; --move-y: -60px; }
+.bg-particle:nth-child(2) { left: 20%; top: 80%; --move-x: -70px; --move-y: 90px; }
+.bg-particle:nth-child(3) { left: 30%; top: 10%; --move-x: 100px; --move-y: -40px; }
+.bg-particle:nth-child(4) { left: 40%; top: 60%; --move-x: -50px; --move-y: 70px; }
+.bg-particle:nth-child(5) { left: 50%; top: 30%; --move-x: 60px; --move-y: -80px; }
+.bg-particle:nth-child(6) { left: 60%; top: 70%; --move-x: -90px; --move-y: 50px; }
+.bg-particle:nth-child(7) { left: 70%; top: 15%; --move-x: 70px; --move-y: -100px; }
+.bg-particle:nth-child(8) { left: 80%; top: 50%; --move-x: -60px; --move-y: 80px; }
+.bg-particle:nth-child(9) { left: 15%; top: 40%; --move-x: 90px; --move-y: -50px; }
+.bg-particle:nth-child(10) { left: 25%; top: 90%; --move-x: -80px; --move-y: 60px; }
+.bg-particle:nth-child(11) { left: 35%; top: 25%; --move-x: 50px; --move-y: -90px; }
+.bg-particle:nth-child(12) { left: 45%; top: 75%; --move-x: -100px; --move-y: 40px; }
+.bg-particle:nth-child(13) { left: 55%; top: 5%; --move-x: 80px; --move-y: -70px; }
+.bg-particle:nth-child(14) { left: 65%; top: 45%; --move-x: -70px; --move-y: 100px; }
+.bg-particle:nth-child(15) { left: 75%; top: 85%; --move-x: 60px; --move-y: -50px; }
+.bg-particle:nth-child(16) { left: 85%; top: 35%; --move-x: -90px; --move-y: 70px; }
+.bg-particle:nth-child(17) { left: 5%; top: 55%; --move-x: 100px; --move-y: -80px; }
+.bg-particle:nth-child(18) { left: 90%; top: 65%; --move-x: -50px; --move-y: 90px; }
+.bg-particle:nth-child(19) { left: 12%; top: 95%; --move-x: 70px; --move-y: -60px; }
+.bg-particle:nth-child(20) { left: 95%; top: 12%; --move-x: -80px; --move-y: 50px; }
 
 .topbar {
   padding: 12px 12px;
   border: 1px solid var(--gray-a3);
   background: var(--gray-a2);
   border-radius: 14px;
+  position: relative;
+  z-index: 2;
 }
 
 .stats .pill {
@@ -31,31 +169,32 @@
   margin-top: 52px;
 }
 
+.coin-container {
+  position: relative;
+  display: inline-block;
+}
+
 /* Moneda mare (buton clicker) */
 .coin {
   width: 210px;
   height: 210px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 35%),
-    radial-gradient(circle at 70% 75%, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0) 45%),
-    linear-gradient(160deg, rgba(210, 210, 210, 0.95), rgba(110, 110, 110, 0.9));
-  box-shadow:
-    0 18px 40px rgba(0, 0, 0, 0.45),
-    inset 0 2px 10px rgba(255, 255, 255, 0.25),
-    inset 0 -10px 18px rgba(0, 0, 0, 0.25);
+  border: none;
+  background: transparent;
+  box-shadow: none;
   cursor: pointer;
   transition: transform 120ms ease;
   user-select: none;
   position: relative;
+  transform: translateX(-25px);
+  transform-origin: center center;
 
   /* ca să nu se vadă outline urât pe click */
   outline: none;
 }
 
 .coin:active {
-  transform: translateY(1px);
+  transform: translateX(-25px) translateY(1px);
 }
 
 .coin-disabled {
@@ -71,11 +210,19 @@
 
 /* NEW: icon-ul lucide (Coins) */
 .coin-svg {
-  width: 96px;
-  height: 96px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
   color: #c0c0c0; /* silver */
   filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.4));
   opacity: 0.95;
+}
+
+.coin-message {
+  margin-top: 24px;
 }
 
 /* (opțional) dacă vrei “pro gold”, aplici class coin-pro pe buton */
@@ -90,21 +237,50 @@
   opacity: 0.98;
 }
 
-/* Animația “pulse + flutter” la click */
+/* Animația "pulse + flutter" la click */
 .coin-press {
   animation: pressPulse 180ms ease-out, flutter 240ms ease-out;
 }
 
 @keyframes pressPulse {
-  0%   { transform: scale(1); }
-  45%  { transform: scale(1.06); }
-  100% { transform: scale(1); }
+  0%   { transform: translateX(-25px) scale(1); }
+  45%  { transform: translateX(-25px) scale(1.06); }
+  100% { transform: translateX(-25px) scale(1); }
 }
 
 @keyframes flutter {
-  0%   { filter: none; }
-  20%  { transform: translateX(-1px) scale(1.04); }
-  40%  { transform: translateX(1px) scale(1.06); }
-  60%  { transform: translateX(-1px) scale(1.03); }
-  100% { transform: translateX(0) scale(1); }
+  0%   { filter: none; transform: translateX(-25px) scale(1); }
+  20%  { transform: translateX(-26px) scale(1.04); }
+  40%  { transform: translateX(-24px) scale(1.06); }
+  60%  { transform: translateX(-26px) scale(1.03); }
+  100% { transform: translateX(-25px) scale(1); }
+}
+
+/* Small coin particles - subtle fountain effect */
+.coin-particle {
+  position: fixed; /* Use fixed to fountain across entire viewport */
+  top: 50%;
+  left: calc(50% - 25px); /* Account for coin's translateX(-25px) offset */
+  font-size: 16px; /* Smaller coins */
+  pointer-events: none;
+  animation: coinFountain calc(var(--speed) * 1500ms) ease-out forwards;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+
+@keyframes coinFountain {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(0, 0) rotate(0deg) scale(1);
+  }
+  45% {
+    opacity: 0.9;
+    /* Peak of arc - coins reach highest point */
+    transform: translate(-50%, -50%) translate(calc(var(--end-x) * 0.5), var(--peak-y)) rotate(180deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    /* Final landing position */
+    transform: translate(-50%, -50%) translate(var(--end-x), var(--end-y)) rotate(360deg) scale(0.6);
+  }
 }
